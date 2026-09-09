@@ -1,0 +1,1002 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Koray — I never published anything, until now</title>
+<meta name="description" content="A self-taught builder's portfolio: a lost 60-hour Minecraft admin dashboard, a Chrome extension, C++/Lua experiments, and the story of finally shipping something.">
+<meta name="color-scheme" content="dark">
+<meta name="theme-color" content="#000000">
+
+<!-- favicon: red square stamp mark, matches the site's --stamp-red -->
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' fill='%23000'/%3E%3Crect x='18' y='18' width='64' height='64' fill='none' stroke='%238C1015' stroke-width='9'/%3E%3C/svg%3E">
+
+<!-- Open Graph / social preview -->
+<meta property="og:type" content="website">
+<meta property="og:title" content="Koray — I never published anything, until now">
+<meta property="og:description" content="A self-taught builder's portfolio: a lost 60-hour Minecraft admin dashboard, a Chrome extension, C++/Lua experiments, and the story of finally shipping something.">
+<meta property="og:image" content="images/runesmp-dashboard-1.png">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Koray — I never published anything, until now">
+<meta name="twitter:description" content="A self-taught builder's portfolio and the story of finally shipping something.">
+<meta name="twitter:image" content="images/runesmp-dashboard-1.png">
+
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Anton&family=JetBrains+Mono:wght@400;500;700&display=swap');
+
+  :root{
+    --ink: #EDEDED;
+    --ink-dim: #8a8a8a;
+    --black: #000000;
+    --stamp-red: #8C1015;
+    --dot: #262626;
+    --border: #2e2e2e;
+    --panel-border: #3a3a3a;
+  }
+
+  *{ box-sizing: border-box; }
+
+  html, body{
+    margin: 0;
+    padding: 0;
+    background: var(--black);
+    color: var(--ink);
+    font-family: 'JetBrains Mono', monospace;
+    scroll-behavior: smooth;
+    overflow-x: hidden;
+  }
+
+  /* --- view switching --- */
+  .view{ display: none; }
+  .view.active{ display: block; }
+
+  /* ============ HERO ============ */
+  .hero{
+    position: relative;
+    min-height: 100vh;
+    width: 100%;
+    background: var(--black);
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    overflow: hidden;
+  }
+
+  .halftone{
+    position: absolute;
+    inset: 0;
+    background-image: radial-gradient(circle, var(--dot) 1.6px, transparent 1.6px);
+    background-size: 14px 14px;
+    -webkit-mask-image: radial-gradient(circle at 88% 82%, black 0%, black 8%, transparent 55%);
+    mask-image: radial-gradient(circle at 88% 82%, black 0%, black 8%, transparent 55%);
+    opacity: 0;
+    animation: bleed-in 2.2s ease-out 0.2s forwards;
+  }
+
+  .halftone.b{
+    background-size: 8px 8px;
+    -webkit-mask-image: radial-gradient(circle at 94% 90%, black 0%, black 4%, transparent 30%);
+    mask-image: radial-gradient(circle at 94% 90%, black 0%, black 4%, transparent 30%);
+    animation-delay: 0.5s;
+  }
+
+  @keyframes bleed-in{ from{ opacity: 0; } to{ opacity: 1; } }
+
+  .hero .content{
+    position: relative;
+    z-index: 2;
+    padding: 8vh 7vw;
+    max-width: 900px;
+  }
+
+  .tag{
+    font-size: 13px;
+    color: var(--ink-dim);
+    margin: 0 0 3.5rem 0;
+    opacity: 0;
+    animation: fade-up 0.6s ease-out 0.3s forwards;
+  }
+  .tag span{ color: var(--ink); }
+
+  .confession{
+    font-family: 'Anton', sans-serif;
+    font-weight: 400;
+    font-size: clamp(2.2rem, 6vw, 4.2rem);
+    line-height: 1.08;
+    margin: 0 0 4.5rem 0;
+    max-width: 11ch;
+  }
+
+  .confession .line{
+    display: block;
+    opacity: 0;
+    transform: translateY(14px);
+    animation: fade-up 0.7s cubic-bezier(.2,.8,.2,1) forwards;
+  }
+  .confession .line:nth-child(1){ animation-delay: 0.55s; }
+  .confession .line:nth-child(2){ animation-delay: 0.85s; }
+  .confession .line:nth-child(3){ animation-delay: 1.15s; color: var(--ink-dim); }
+
+  @keyframes fade-up{ to{ opacity: 1; transform: translateY(0); } }
+
+  .stamp-wrap{
+    opacity: 0;
+    animation: stamp-in 0.5s cubic-bezier(.34,1.56,.64,1) 1.6s forwards;
+  }
+  @keyframes stamp-in{
+    from{ opacity: 0; transform: rotate(-3deg) scale(1.15); }
+    to{ opacity: 1; transform: rotate(-3deg) scale(1); }
+  }
+
+  .stamp{
+    display: inline-block;
+    border: 3px solid var(--stamp-red);
+    padding: 0.9rem 1.4rem;
+  }
+  .stamp p{
+    font-family: 'Anton', sans-serif;
+    font-weight: 400;
+    font-size: clamp(1.1rem, 2.6vw, 1.6rem);
+    line-height: 1.2;
+    color: var(--stamp-red);
+    margin: 0;
+    max-width: 16ch;
+  }
+
+  .aside{
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 13px;
+    line-height: 1.7;
+    color: var(--ink-dim);
+    max-width: 42ch;
+    margin: 1.8rem 0 0 0;
+    opacity: 0;
+    animation: fade-up 0.8s ease-out 2.3s forwards;
+  }
+
+  .scroll-cue{
+    position: absolute;
+    bottom: 5vh;
+    left: 7vw;
+    z-index: 2;
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    font-size: 11px;
+    color: var(--ink-dim);
+    background: none;
+    border: none;
+    font-family: 'JetBrains Mono', monospace;
+    cursor: pointer;
+    opacity: 0;
+    animation: fade-up 0.6s ease-out 2.9s forwards;
+  }
+  .scroll-cue:hover{ color: var(--ink); }
+  .scroll-line{ width: 28px; height: 1px; background: var(--ink-dim); }
+
+  @media (prefers-reduced-motion: reduce){
+    .halftone, .confession .line, .stamp-wrap, .tag, .scroll-cue, .aside, .song-card .eq span{
+      animation: none !important; opacity: 1 !important; transform: none !important;
+    }
+  }
+
+  /* ============ CHOICE ============ */
+  .choice{
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    overflow: hidden;
+    padding: 6vh 6vw;
+  }
+
+  .choice::before{
+    content: "";
+    position: absolute;
+    inset: 0;
+    background-image: radial-gradient(circle, var(--dot) 1.4px, transparent 1.4px);
+    background-size: 13px 13px;
+    -webkit-mask-image: radial-gradient(circle at 50% 40%, black 0%, black 4%, transparent 46%);
+    mask-image: radial-gradient(circle at 50% 40%, black 0%, black 4%, transparent 46%);
+    pointer-events: none;
+  }
+
+  .prompt{
+    position: relative;
+    z-index: 2;
+    font-family: 'Anton', sans-serif;
+    font-weight: 400;
+    font-size: clamp(1.6rem, 4.2vw, 2.6rem);
+    line-height: 1.25;
+    text-align: center;
+    max-width: 16ch;
+    margin: 0 0 4rem 0;
+  }
+
+  .options{
+    position: relative;
+    z-index: 2;
+    display: flex;
+    gap: 1.5rem;
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+
+  .option{
+    width: 260px;
+    border: 2px solid #3a3a3a;
+    padding: 2rem 1.6rem;
+    text-align: left;
+    background: none;
+    cursor: pointer;
+    transition: border-color 0.2s ease, transform 0.2s ease;
+    color: var(--ink);
+    font-family: 'JetBrains Mono', monospace;
+  }
+  .option:hover{ border-color: var(--ink); transform: translateY(-3px); }
+  .option.primary:hover{ border-color: var(--stamp-red); }
+  .option .kicker{ display: block; font-size: 11px; color: var(--ink-dim); margin-bottom: 0.8rem; }
+  .option.primary .kicker{ color: var(--stamp-red); }
+  .option .title{ font-family: 'Anton', sans-serif; font-weight: 400; font-size: 1.35rem; margin: 0 0 0.7rem 0; line-height: 1.2; }
+  .option .sub{ font-size: 12.5px; color: #b5b5b5; line-height: 1.6; margin: 0; }
+
+  .footnote{
+    position: relative;
+    z-index: 2;
+    margin-top: 3rem;
+    font-size: 11px;
+    color: #5a5a5a;
+    text-align: center;
+    max-width: 32ch;
+  }
+
+  @media (max-width: 600px){
+    .options{ flex-direction: column; align-items: center; }
+    .option{ width: 100%; max-width: 320px; }
+  }
+
+  /* ============ STORY ============ */
+  .stage{
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 6vh 5vw;
+  }
+
+  .panel{
+    display: none;
+    position: relative;
+    width: 100%;
+    max-width: 720px;
+    border: 2px solid var(--panel-border);
+    padding: 3.5rem 3rem;
+    overflow: hidden;
+  }
+  .panel.active{ display: block; }
+
+  .panel.corner-tl::before{
+    content: "";
+    position: absolute;
+    inset: 0;
+    background-image: radial-gradient(circle, var(--dot) 1.4px, transparent 1.4px);
+    background-size: 12px 12px;
+    -webkit-mask-image: radial-gradient(circle at 8% 10%, black 0%, black 6%, transparent 42%);
+    mask-image: radial-gradient(circle at 8% 10%, black 0%, black 6%, transparent 42%);
+    pointer-events: none;
+  }
+  .panel.corner-br::before{
+    content: "";
+    position: absolute;
+    inset: 0;
+    background-image: radial-gradient(circle, var(--dot) 1.4px, transparent 1.4px);
+    background-size: 12px 12px;
+    -webkit-mask-image: radial-gradient(circle at 92% 90%, black 0%, black 6%, transparent 42%);
+    mask-image: radial-gradient(circle at 92% 90%, black 0%, black 6%, transparent 42%);
+    pointer-events: none;
+  }
+
+  .progress{
+    position: relative;
+    z-index: 2;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 11px;
+    color: var(--ink-dim);
+    margin-bottom: 2.5rem;
+  }
+  .progress .count{ color: var(--ink); }
+  .progress .dots{ display: flex; gap: 5px; margin-left: 0.4rem; }
+  .progress .dots span{ width: 5px; height: 5px; background: var(--panel-border); display: block; }
+  .progress .dots span.filled{ background: var(--ink); }
+
+  .label{ position: relative; z-index: 2; font-size: 12px; color: var(--stamp-red); margin: 0 0 1rem 0; }
+
+  .anecdote{
+    position: relative;
+    z-index: 2;
+    font-family: 'Anton', sans-serif;
+    font-weight: 400;
+    font-size: clamp(1.5rem, 3.6vw, 2.1rem);
+    line-height: 1.25;
+    margin: 0 0 1.6rem 0;
+    max-width: 22ch;
+  }
+
+  .body-text{
+    position: relative;
+    z-index: 2;
+    font-size: 14.5px;
+    line-height: 1.75;
+    color: #cfcfcf;
+    max-width: 52ch;
+    margin: 0 0 2.4rem 0;
+  }
+
+  .tip{
+    position: relative;
+    z-index: 2;
+    border-left: 3px solid var(--stamp-red);
+    padding: 0.9rem 1.2rem;
+    background: rgba(140, 16, 21, 0.06);
+    margin-bottom: 2.8rem;
+  }
+  .tip p{ margin: 0; font-size: 13px; line-height: 1.6; color: var(--ink); }
+  .tip .tip-label{ display: block; font-size: 10.5px; color: var(--stamp-red); margin-bottom: 0.4rem; }
+
+  .nav{
+    position: relative;
+    z-index: 2;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding-top: 1.6rem;
+    border-top: 1px solid var(--panel-border);
+  }
+  .nav button{
+    font-family: 'JetBrains Mono', monospace;
+    background: none;
+    border: none;
+    color: var(--ink-dim);
+    font-size: 12.5px;
+    cursor: pointer;
+    padding: 0.4rem 0;
+  }
+  .nav button:hover{ color: var(--ink); }
+  .nav .next{ color: var(--ink); display: flex; align-items: center; gap: 0.5rem; }
+  .nav .next:hover .arrow{ transform: translateX(3px); }
+  .arrow{ display: inline-block; transition: transform 0.2s ease; }
+
+  /* --- about-me panel --- */
+  .bio-grid{
+    position: relative; z-index: 2;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+    gap: 1.3rem;
+    border: 1px solid var(--panel-border);
+    padding: 1.6rem 1.4rem;
+    margin-bottom: 2rem;
+  }
+  .bio-item .bio-label{ display: block; font-size: 10px; color: var(--ink-dim); margin-bottom: 0.35rem; letter-spacing: 0.03em; }
+  .bio-item .bio-value{ font-size: 13px; color: var(--ink); line-height: 1.5; }
+  .bio-item .bio-value.dim{ color: #666; font-style: italic; }
+
+  .song-card{
+    position: relative; z-index: 2;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    border-left: 3px solid var(--stamp-red);
+    padding: 0.9rem 1.2rem;
+    margin-bottom: 2.8rem;
+    background: rgba(140, 16, 21, 0.06);
+    flex-wrap: wrap;
+  }
+  .song-card .eq{ display: flex; align-items: flex-end; gap: 2px; height: 18px; flex-shrink: 0; }
+  .song-card .eq span{ width: 3px; background: var(--stamp-red); animation: eq-bounce 0.9s ease-in-out infinite; }
+  .song-card .eq span:nth-child(1){ height: 40%; animation-delay: 0s; }
+  .song-card .eq span:nth-child(2){ height: 100%; animation-delay: 0.15s; }
+  .song-card .eq span:nth-child(3){ height: 65%; animation-delay: 0.3s; }
+  .song-card .eq span:nth-child(4){ height: 85%; animation-delay: 0.45s; }
+  @keyframes eq-bounce{ 0%, 100%{ transform: scaleY(0.4); } 50%{ transform: scaleY(1); } }
+  .song-card .song-info{ flex: 1; min-width: 140px; }
+  .song-card .song-label{ font-size: 10px; color: var(--stamp-red); display: block; margin-bottom: 0.3rem; }
+  .song-card .song-title{ font-family: 'Anton', sans-serif; font-weight: 400; font-size: 1rem; margin: 0 0 0.2rem 0; }
+  .song-card .song-artist{ font-size: 11.5px; color: #a8a8a8; margin: 0; }
+  .song-card a{ font-size: 11px; color: var(--ink); text-decoration: none; border-bottom: 1px solid #555; white-space: nowrap; }
+  .song-card a:hover{ border-color: var(--ink); }
+
+  @media (max-width: 600px){
+    .panel{ padding: 2.6rem 1.6rem; }
+    .stage{ padding: 5vh 4vw; }
+  }
+
+  .kbd-hint{
+    position: fixed;
+    top: 1.2rem;
+    right: 1.6rem;
+    z-index: 5;
+    font-size: 10.5px;
+    color: #4a4a4a;
+    margin: 0;
+  }
+  @media (max-width: 700px){
+    .kbd-hint{ display: none; }
+  }
+
+  /* ============ SITE ============ */
+  .site-nav{
+    position: sticky;
+    top: 0;
+    z-index: 10;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 1.6rem 7vw;
+    background: rgba(0,0,0,0.9);
+    backdrop-filter: blur(6px);
+    border-bottom: 1px solid var(--border);
+  }
+  .site-nav .name{
+    font-family: 'Anton', sans-serif;
+    font-size: 1rem;
+    color: var(--ink);
+  }
+  .site-nav .links{ display: flex; gap: 1.8rem; }
+  .site-nav .links button{
+    font-family: 'JetBrains Mono', monospace;
+    background: none;
+    border: none;
+    color: var(--ink-dim);
+    font-size: 12px;
+    cursor: pointer;
+    padding: 0;
+  }
+  .site-nav .links button:hover{ color: var(--ink); }
+
+  section{ padding: 8vh 7vw; position: relative; }
+
+  .section-head{
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    border-bottom: 1px solid var(--border);
+    padding-bottom: 1.4rem;
+    margin-bottom: 3rem;
+    flex-wrap: wrap;
+    gap: 0.8rem;
+  }
+  .section-head h2{ font-family: 'Anton', sans-serif; font-weight: 400; font-size: clamp(1.6rem, 3.4vw, 2.3rem); margin: 0; }
+  .section-head .count{ font-size: 12px; color: var(--ink-dim); }
+
+  /* --- flagship --- */
+  .flagship{
+    position: relative;
+    border: 2px solid var(--stamp-red);
+    padding: 3rem 2.4rem;
+    margin-bottom: 3.5rem;
+    overflow: hidden;
+  }
+  .flagship::before{
+    content: "";
+    position: absolute;
+    inset: 0;
+    background-image: radial-gradient(circle, var(--dot) 1.4px, transparent 1.4px);
+    background-size: 11px 11px;
+    -webkit-mask-image: radial-gradient(circle at 4% 96%, black 0%, black 5%, transparent 40%);
+    mask-image: radial-gradient(circle at 4% 96%, black 0%, black 5%, transparent 40%);
+    pointer-events: none;
+  }
+  .flagship-head{ position: relative; z-index: 2; margin-bottom: 2rem; }
+  .flagship-head .kicker{ display: block; font-size: 11px; color: var(--stamp-red); margin-bottom: 0.6rem; }
+  .flagship-head h3{ font-family: 'Anton', sans-serif; font-weight: 400; font-size: clamp(1.5rem, 3vw, 2.1rem); margin: 0 0 1.1rem 0; max-width: 26ch; }
+  .flagship-head p{ font-size: 13px; color: #b8b8b8; max-width: 60ch; line-height: 1.75; margin: 0 0 1rem 0; }
+  .flagship-head .quote{ font-style: italic; color: var(--ink); }
+
+  .flagship-shots{ position: relative; z-index: 2; display: grid; grid-template-columns: repeat(2, 1fr); gap: 1rem; margin-bottom: 2rem; }
+  .flagship-shots .shot{
+    aspect-ratio: 16 / 10;
+    border: 1px solid var(--border);
+    background: #0d0d0d;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 11px; color: var(--ink-dim); text-align: center; padding: 0.6rem; overflow: hidden;
+  }
+  .flagship-shots .shot img{ width: 100%; height: 100%; object-fit: cover; display: block; }
+
+  .flagship-features{ position: relative; z-index: 2; display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 1.2rem; margin-bottom: 1.8rem; }
+  .flagship-features .feature{ border-left: 2px solid #4a4a4a; padding: 0 0 0 1.1rem; }
+  .flagship-features .feature .stack{ font-size: 10.5px; color: var(--ink-dim); margin-bottom: 0.5rem; }
+  .flagship-features .feature p{ font-size: 12px; color: #a8a8a8; line-height: 1.6; margin: 0; }
+
+  .flagship-note{
+    position: relative; z-index: 2;
+    border-left: 3px solid var(--stamp-red);
+    padding: 0.9rem 1.2rem;
+    background: rgba(140, 16, 21, 0.06);
+    font-size: 12.5px; line-height: 1.65; color: #d5d5d5;
+  }
+
+  /* --- grid --- */
+  .grid{ display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 1.4rem; margin-bottom: 9vh; }
+  .card{ border: 1px solid var(--border); padding: 1.8rem 1.6rem; transition: border-color 0.2s ease; }
+  .card:hover{ border-color: #555; }
+  .card .stack{ font-size: 10.5px; color: var(--stamp-red); margin-bottom: 0.9rem; }
+  .card h3{ font-family: 'Anton', sans-serif; font-weight: 400; font-size: 1.15rem; margin: 0 0 0.7rem 0; line-height: 1.25; }
+  .card p{ font-size: 12.5px; line-height: 1.65; color: #b8b8b8; margin: 0 0 1.2rem 0; }
+  .card a{ font-size: 11.5px; color: var(--ink); text-decoration: none; border-bottom: 1px solid #555; padding-bottom: 2px; }
+  .card a:hover{ border-color: var(--ink); }
+
+  /* --- metal --- */
+  .metal{ position: relative; border: 2px solid var(--stamp-red); padding: 3rem 2.4rem; overflow: hidden; }
+  .metal::before{
+    content: "";
+    position: absolute; inset: 0;
+    background-image: radial-gradient(circle, var(--dot) 1.4px, transparent 1.4px);
+    background-size: 11px 11px;
+    -webkit-mask-image: radial-gradient(circle at 95% 8%, black 0%, black 5%, transparent 40%);
+    mask-image: radial-gradient(circle at 95% 8%, black 0%, black 5%, transparent 40%);
+    pointer-events: none;
+  }
+  .metal-head{ position: relative; z-index: 2; margin-bottom: 2.4rem; }
+  .metal-head .kicker{ display: block; font-size: 11px; color: var(--stamp-red); margin-bottom: 0.6rem; }
+  .metal-head h3{ font-family: 'Anton', sans-serif; font-weight: 400; font-size: clamp(1.4rem, 2.8vw, 1.9rem); margin: 0 0 0.9rem 0; max-width: 26ch; }
+  .metal-head p{ font-size: 12.5px; color: #b8b8b8; max-width: 52ch; line-height: 1.7; margin: 0; }
+  .metal-grid{ position: relative; z-index: 2; display: grid; grid-template-columns: repeat(auto-fit, minmax(230px, 1fr)); gap: 1.4rem; }
+  .metal-card{ border-left: 2px solid #4a4a4a; padding: 0 0 0 1.2rem; }
+  .metal-card .stack{ font-size: 10.5px; color: var(--ink-dim); margin-bottom: 0.7rem; }
+  .metal-card h4{ font-family: 'Anton', sans-serif; font-weight: 400; font-size: 1.05rem; margin: 0 0 0.6rem 0; line-height: 1.25; }
+  .metal-card p{ font-size: 12px; color: #a8a8a8; line-height: 1.6; margin: 0; }
+
+  .site-foot{
+    padding: 4vh 7vw 6vh;
+    border-top: 1px solid var(--border);
+    font-size: 11px;
+    color: #5a5a5a;
+    display: flex;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 1rem;
+  }
+  .site-foot button{
+    background: none; border: none; color: #5a5a5a; font-family: 'JetBrains Mono', monospace;
+    font-size: 11px; cursor: pointer; padding: 0;
+  }
+  .site-foot button:hover{ color: var(--ink); }
+
+  @media (max-width: 600px){
+    section{ padding: 6vh 6vw; }
+    .metal{ padding: 2rem 1.4rem; }
+    .flagship{ padding: 2rem 1.4rem; }
+    .flagship-shots{ grid-template-columns: 1fr; }
+    .site-nav{ padding: 1.2rem 6vw; }
+  }
+</style>
+</head>
+<body>
+
+<!-- ============ HERO ============ -->
+<div class="view active" id="view-hero">
+  <div class="hero">
+    <div class="halftone"></div>
+    <div class="halftone b"></div>
+    <div class="content">
+      <p class="tag">prada <span>· koray</span></p>
+      <h1 class="confession">
+        <span class="line">I never published anything.</span>
+        <span class="line">I was scared of failing.</span>
+        <span class="line">I still am.</span>
+      </h1>
+      <div class="stamp-wrap">
+        <div class="stamp">
+          <p>Make them proud<br>before it is too late.</p>
+        </div>
+      </div>
+      <p class="aside">I found out too late for someone I loved. If there's someone you haven't told yet, or something you keep putting off &mdash; maybe don't wait like I did.</p>
+    </div>
+    <button class="scroll-cue" onclick="goTo('choice')">
+      <span class="scroll-line"></span>
+      <span>scroll</span>
+    </button>
+  </div>
+</div>
+
+<!-- ============ CHOICE ============ -->
+<div class="view" id="view-choice">
+  <div class="choice">
+    <h2 class="prompt">However you want to do this is fine.</h2>
+    <div class="options">
+      <button class="option primary" onclick="startStory()">
+        <span class="kicker">7 short panels · ~5 min</span>
+        <span class="title">Read my story</span>
+        <p class="sub">The parts I got stuck on, and what actually got me unstuck.</p>
+      </button>
+      <button class="option" onclick="goTo('site')">
+        <span class="kicker">straight to it</span>
+        <span class="title">Just show me the site</span>
+        <p class="sub">Projects, tips, and everything else — no detour.</p>
+      </button>
+    </div>
+    <p class="footnote">You can always get to the story later from the menu.</p>
+  </div>
+</div>
+
+<!-- ============ STORY ============ -->
+<div class="view" id="view-story">
+  <p class="kbd-hint">← → to move &middot; esc to skip</p>
+  <div class="stage">
+
+    <div class="panel corner-tl active" data-panel="1">
+      <div class="progress">
+        <span class="count">panel 1 / 7</span>
+        <span class="dots"><span class="filled"></span><span></span><span></span><span></span><span></span><span></span><span></span></span>
+      </div>
+      <p class="label">before the story</p>
+      <h2 class="anecdote">A little about me first.</h2>
+      <p class="body-text">
+        I'm Koray &mdash; online I mostly go by prada. Before any of the parts where I got stuck,
+        here's the plain version of who's telling this story.
+      </p>
+
+      <div class="bio-grid">
+        <div class="bio-item">
+          <span class="bio-label">name</span>
+          <span class="bio-value">Koray</span>
+        </div>
+        <div class="bio-item">
+          <span class="bio-label">based in</span>
+          <span class="bio-value">Switzerland</span>
+        </div>
+        <div class="bio-item">
+          <span class="bio-label">main languages</span>
+          <span class="bio-value">JavaScript, C++, Lua</span>
+        </div>
+        <div class="bio-item">
+          <span class="bio-label">also know</span>
+          <span class="bio-value">HTML/CSS, Python</span>
+        </div>
+        <div class="bio-item">
+          <span class="bio-label">earned from coding, by 15</span>
+          <span class="bio-value">up to $15,000 &mdash; bug bounties, partnerships, and project work</span>
+        </div>
+        <div class="bio-item">
+          <span class="bio-label">also into</span>
+          <span class="bio-value">Minecraft, and 2 cats</span>
+        </div>
+      </div>
+
+      <div class="song-card">
+        <div class="eq"><span></span><span></span><span></span><span></span></div>
+        <div class="song-info">
+          <span class="song-label">currently on repeat</span>
+          <p class="song-title">Vanished</p>
+          <p class="song-artist">Crystal Castles</p>
+        </div>
+        <a href="https://open.spotify.com/search/Crystal%20Castles%20Vanished" target="_blank" rel="noopener">listen ↗</a>
+      </div>
+
+      <div class="nav">
+        <button class="skip" onclick="goTo('site')">skip to the site →</button>
+        <button class="next" onclick="nextPanel()">continue <span class="arrow">→</span></button>
+      </div>
+    </div>
+
+    <div class="panel corner-br" data-panel="2">
+      <div class="progress">
+        <span class="count">panel 2 / 7</span>
+        <span class="dots"><span class="filled"></span><span class="filled"></span><span></span><span></span><span></span><span></span><span></span></span>
+      </div>
+      <p class="label">the first time it worked</p>
+      <h2 class="anecdote">One button. That's all it did. I stared at it for ten minutes.</h2>
+      <p class="body-text">
+        Before this site, before any of the projects below, there was one small thing that
+        actually ran the way I meant it to. It wasn't impressive. Nobody else would have looked
+        twice. But it was mine, and it worked, and that changed what I thought I could do next.
+      </p>
+      <div class="tip">
+        <span class="tip-label">what actually helped</span>
+        <p>Start smaller than feels worth it. The first working thing doesn't need to be good — it needs to prove the loop works, so you'll do it again.</p>
+      </div>
+      <div class="nav">
+        <button class="skip" onclick="goTo('site')">skip to the site →</button>
+        <button class="next" onclick="nextPanel()">continue <span class="arrow">→</span></button>
+      </div>
+    </div>
+
+    <div class="panel corner-tl" data-panel="3">
+      <div class="progress">
+        <span class="count">panel 3 / 7</span>
+        <span class="dots"><span class="filled"></span><span class="filled"></span><span class="filled"></span><span></span><span></span><span></span><span></span></span>
+      </div>
+      <p class="label">the tricky part</p>
+      <h2 class="anecdote">Three days on one error. I almost quit.</h2>
+      <p class="body-text">
+        The console just said <em>undefined is not a function</em>. I changed things at random
+        hoping something would fix it. Nothing did. I didn't tell anyone I was stuck &mdash;
+        it felt like proof I wasn't cut out for this.
+      </p>
+      <div class="tip">
+        <span class="tip-label">what actually helped</span>
+        <p>The error message tells you the file and line number &mdash; read that part first, not the scary red text. Most of the time the bug is exactly where it says it is.</p>
+      </div>
+      <div class="nav">
+        <button class="skip" onclick="goTo('site')">skip to the site →</button>
+        <button class="next" onclick="nextPanel()">continue <span class="arrow">→</span></button>
+      </div>
+    </div>
+
+    <div class="panel corner-br" data-panel="4">
+      <div class="progress">
+        <span class="count">panel 4 / 7</span>
+        <span class="dots"><span class="filled"></span><span class="filled"></span><span class="filled"></span><span class="filled"></span><span></span><span></span><span></span></span>
+      </div>
+      <p class="label">the part I don't put in the project list</p>
+      <h2 class="anecdote">I lost two projects. One of them was 60+ hours.</h2>
+      <p class="body-text">
+        A Discord tool, gone. Then a full admin dashboard I'd built for a Minecraft server &mdash;
+        login pages, a database, live server stats, a permissions system &mdash; 60-plus hours,
+        gone with no backup anywhere. Both are in the projects section below with no repo link,
+        because there isn't one anymore.
+      </p>
+      <div class="tip">
+        <span class="tip-label">what actually helped</span>
+        <p>Push to a repo the same day you start, even a private one nobody else will see. It costs nothing and it's the only thing that would have saved either project.</p>
+      </div>
+      <div class="nav">
+        <button class="skip" onclick="goTo('site')">skip to the site →</button>
+        <button class="next" onclick="nextPanel()">continue <span class="arrow">→</span></button>
+      </div>
+    </div>
+
+    <div class="panel corner-tl" data-panel="5">
+      <div class="progress">
+        <span class="count">panel 5 / 7</span>
+        <span class="dots"><span class="filled"></span><span class="filled"></span><span class="filled"></span><span class="filled"></span><span class="filled"></span><span></span><span></span></span>
+      </div>
+      <p class="label">imposter syndrome</p>
+      <h2 class="anecdote">Everyone else's code looked like it was written by an adult.</h2>
+      <p class="body-text">
+        I'd open someone else's repo and it looked clean, organized, like they'd never once
+        been confused. Mine never looked like that. I assumed that meant something about me,
+        instead of just meaning I was only seeing their finished version.
+      </p>
+      <div class="tip">
+        <span class="tip-label">what actually helped</span>
+        <p>You're comparing your rough draft to someone else's final cut. Nobody's commit history looks clean while they're actually writing it.</p>
+      </div>
+      <div class="nav">
+        <button class="skip" onclick="goTo('site')">skip to the site →</button>
+        <button class="next" onclick="nextPanel()">continue <span class="arrow">→</span></button>
+      </div>
+    </div>
+
+    <div class="panel corner-br" data-panel="6">
+      <div class="progress">
+        <span class="count">panel 6 / 7</span>
+        <span class="dots"><span class="filled"></span><span class="filled"></span><span class="filled"></span><span class="filled"></span><span class="filled"></span><span class="filled"></span><span></span></span>
+      </div>
+      <p class="label">asking for help</p>
+      <h2 class="anecdote">Asking felt like admitting I'd already failed.</h2>
+      <p class="body-text">
+        I'd sit on a problem for hours before asking anyone, because asking felt like proof I
+        couldn't do it alone. It took a while to notice that the people I looked up to asked
+        questions constantly, in public, without it costing them anything.
+      </p>
+      <div class="tip">
+        <span class="tip-label">what actually helped</span>
+        <p>Write the question down before you send it. Half the time, writing it out clearly enough for someone else to understand is what shows you the answer.</p>
+      </div>
+      <div class="nav">
+        <button class="skip" onclick="goTo('site')">skip to the site →</button>
+        <button class="next" onclick="nextPanel()">continue <span class="arrow">→</span></button>
+      </div>
+    </div>
+
+    <div class="panel corner-tl" data-panel="7">
+      <div class="progress">
+        <span class="count">panel 7 / 7</span>
+        <span class="dots"><span class="filled"></span><span class="filled"></span><span class="filled"></span><span class="filled"></span><span class="filled"></span><span class="filled"></span><span class="filled"></span></span>
+      </div>
+      <p class="label">where that leaves me</p>
+      <h2 class="anecdote">This site is the first thing I'm actually publishing.</h2>
+      <p class="body-text">
+        Not because I stopped being scared of it going badly. I haven't. But the projects
+        below are real, the failures in this story are real, and I'd rather put both out
+        than wait for a version of me that isn't scared anymore.
+      </p>
+      <div class="tip">
+        <span class="tip-label">what actually helped</span>
+        <p>Publishing scared is still publishing. Waiting for confidence first usually just means waiting forever.</p>
+      </div>
+      <div class="nav">
+        <button class="skip" onclick="goTo('site')">skip to the site →</button>
+        <button class="next" onclick="goTo('site')">enter the site <span class="arrow">→</span></button>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ============ SITE ============ -->
+<div class="view" id="view-site">
+
+  <nav class="site-nav">
+    <span class="name">koray</span>
+    <div class="links">
+      <button onclick="goTo('hero')">home</button>
+      <button onclick="scrollToProjects()">projects</button>
+      <button onclick="startStory()">my story</button>
+    </div>
+  </nav>
+
+  <section id="projects">
+    <div class="section-head">
+      <h2>Things I've built</h2>
+      <span class="count">web &amp; software</span>
+    </div>
+
+    <div class="flagship">
+      <div class="flagship-head">
+        <span class="kicker">the biggest thing I've built</span>
+        <h3>RuneSMP — Custom Admin Dashboard</h3>
+        <p>
+          I don't trust built software, so I built my own. A full control panel for running
+          a Minecraft server &mdash; PvP toggling, safezone management, live TPS/RAM/JVM
+          monitoring, and a permissions editor with per-node allow/deny/inherit rules and
+          weighted groups. <span class="quote">Over 60 hours went into this.</span>
+        </p>
+        <p>
+          Source is gone &mdash; lost with no backup. What's here is from screenshots,
+          because losing 60+ hours of work doesn't erase that it existed, or that it worked.
+        </p>
+      </div>
+
+      <div class="flagship-shots">
+        <div class="shot">
+          <img src="images/runesmp-dashboard-1.png" alt="RuneSMP dashboard — server-wide PvP toggle and safezone list" loading="lazy">
+        </div>
+        <div class="shot">
+          <img src="images/runesmp-dashboard-2.png" alt="RuneSMP dashboard — live TPS, JVM memory, and world/entity stats" loading="lazy">
+        </div>
+      </div>
+
+      <div class="flagship-features">
+        <div class="feature">
+          <p class="stack">backend</p>
+          <p>Java Paper plugin exposing live server data (TPS, RAM, JVM) and applying changes in real time through an API.</p>
+        </div>
+        <div class="feature">
+          <p class="stack">frontend</p>
+          <p>Login-gated web dashboard with a full front end and back end talking to the plugin API.</p>
+        </div>
+        <div class="feature">
+          <p class="stack">database</p>
+          <p>Stored server data, permissions, and account state persistently, not just in memory.</p>
+        </div>
+        <div class="feature">
+          <p class="stack">integrations</p>
+          <p>Webhook logging for staff audit trails, plus a Discord bot for account verification and in-game rewards.</p>
+        </div>
+      </div>
+
+      <div class="flagship-note">
+        No repo link here &mdash; it's gone. If you're reading this and haven't pushed your own
+        project to git yet: do it today, even just a private repo. This is exactly what
+        not doing that costs you.
+      </div>
+    </div>
+
+    <div class="grid">
+      <div class="card">
+        <p class="stack">javascript · chrome extension</p>
+        <h3>Stax</h3>
+        <p>A Chrome extension that sorts messy tabs into color-coded groups automatically, with local rules doing the heavy lifting and an optional AI fallback for whatever's left over.</p>
+        <a href="https://github.com/babaminghong/stax" target="_blank" rel="noopener">view project →</a>
+      </div>
+
+      <div class="card">
+        <p class="stack">javascript · discord</p>
+        <h3>Discord Username Sniper</h3>
+        <p>A tool that watched for a Discord username to become available and claimed it the moment it dropped. Lost the source for this one &mdash; it's here as a record, not a link.</p>
+      </div>
+
+      <div class="card">
+        <p class="stack">java · paper</p>
+        <h3>Minecraft Custom Plugin</h3>
+        <p>A gameplay plugin for a Paper server &mdash; custom commands, a handful of tweaked mechanics, and some quality-of-life fixes for players. Lost the source for this one too &mdash; it's here as a record, not a link.</p>
+      </div>
+    </div>
+
+    <div class="metal">
+      <div class="metal-head">
+        <span class="kicker">closer to the metal</span>
+        <h3>The stuff most portfolios don't have.</h3>
+        <p>C++ and Lua work &mdash; games, tools, hardware &mdash; further from the browser than most personal sites go.</p>
+      </div>
+      <div class="metal-grid">
+        <div class="metal-card">
+          <p class="stack">c++ · sfml</p>
+          <h4>2D Physics Sandbox</h4>
+          <p>A little particle &amp; rigid-body playground &mdash; gravity wells, collisions, drag. Broke first at a few thousand particles, because I was checking every pair against every other pair. Spatial partitioning fixed it; I just didn't know that word yet when I started.</p>
+        </div>
+        <div class="metal-card">
+          <p class="stack">lua · wow addon</p>
+          <h4>Combat Log DPS Tracker</h4>
+          <p>Parsed the WoW combat log in real time to show live damage-per-second and post-fight breakdowns. Broke first during big pulls &mdash; events fired faster than my parser could drain the queue, and numbers would silently fall behind.</p>
+        </div>
+        <div class="metal-card">
+          <p class="stack">c++ · esp32</p>
+          <h4>Server Closet Fan Controller</h4>
+          <p>Temp sensors and PWM fan control for the closet running the Minecraft box, reporting back over MQTT. Broke first because I had the PWM curve inverted &mdash; fans ran full blast at idle and did nothing once it actually got hot.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <footer class="site-foot">
+    <span>koray · built for stardance</span>
+    <button onclick="startStory()">read the story →</button>
+  </footer>
+
+</div>
+
+<script>
+  var currentPanel = 1;
+  var TOTAL_PANELS = 7;
+
+  function goTo(view){
+    document.querySelectorAll('.view').forEach(function(v){ v.classList.remove('active'); });
+    document.getElementById('view-' + view).classList.add('active');
+    window.scrollTo(0, 0);
+  }
+
+  function showPanel(n){
+    currentPanel = n;
+    document.querySelectorAll('.panel').forEach(function(p){
+      p.classList.toggle('active', parseInt(p.dataset.panel, 10) === n);
+    });
+  }
+
+  function startStory(){
+    showPanel(1);
+    goTo('story');
+  }
+
+  function nextPanel(){
+    if (currentPanel < TOTAL_PANELS){
+      showPanel(currentPanel + 1);
+      window.scrollTo(0, 0);
+    } else {
+      goTo('site');
+    }
+  }
+
+  function scrollToProjects(){
+    goTo('site');
+    var el = document.getElementById('projects');
+    if (el) el.scrollIntoView({ behavior: 'instant' });
+  }
+
+  // keyboard support in story mode: arrows to move, escape to skip to the site
+  document.addEventListener('keydown', function(e){
+    var storyView = document.getElementById('view-story');
+    if (!storyView.classList.contains('active')) return;
+
+    if (e.key === 'ArrowRight' || e.key === 'Enter'){
+      e.preventDefault();
+      nextPanel();
+    } else if (e.key === 'ArrowLeft' && currentPanel > 1){
+      e.preventDefault();
+      showPanel(currentPanel - 1);
+      window.scrollTo(0, 0);
+    } else if (e.key === 'Escape'){
+      e.preventDefault();
+      goTo('site');
+    }
+  });
+</script>
+
+</body>
+</html>
