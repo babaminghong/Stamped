@@ -427,6 +427,105 @@
     .kbd-hint{ display: none; }
   }
 
+  /* --- terminal easter egg --- */
+  .term-toggle{
+    position: fixed;
+    bottom: 1.6rem;
+    right: 1.8rem;
+    z-index: 50;
+    width: 46px;
+    height: 46px;
+    border: 2px solid var(--stamp-red, #8C1015);
+    background: #000;
+    color: var(--ink, #EDEDED);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 15px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: transform 0.15s ease, background 0.15s ease;
+  }
+  .term-toggle:hover{ background: #111; transform: translateY(-2px); }
+
+  .term-overlay{
+    position: fixed;
+    inset: 0;
+    z-index: 100;
+    background: rgba(0,0,0,0.75);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    padding: 5vh 5vw;
+  }
+  .term-overlay.open{ display: flex; }
+
+  .term-window{
+    width: 100%;
+    max-width: 640px;
+    max-height: 70vh;
+    background: #000;
+    border: 2px solid var(--stamp-red, #8C1015);
+    display: flex;
+    flex-direction: column;
+    font-family: 'JetBrains Mono', monospace;
+  }
+
+  .term-bar{
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0.6rem 1rem;
+    border-bottom: 1px solid #333;
+    font-size: 11px;
+    color: #8a8a8a;
+  }
+  .term-bar button{
+    background: none;
+    border: none;
+    color: #8a8a8a;
+    font-family: 'JetBrains Mono', monospace;
+    cursor: pointer;
+    font-size: 14px;
+  }
+  .term-bar button:hover{ color: var(--ink, #EDEDED); }
+
+  .term-body{
+    flex: 1;
+    overflow-y: auto;
+    padding: 1rem 1.1rem;
+    font-size: 13px;
+    line-height: 1.7;
+    color: #cfcfcf;
+  }
+  .term-body .term-line{ white-space: pre-wrap; word-break: break-word; margin: 0 0 0.2rem 0; }
+  .term-body .term-prompt{ color: var(--stamp-red, #8C1015); }
+  .term-body .term-cmd{ color: var(--ink, #EDEDED); }
+  .term-body .term-resp{ color: #a8a8a8; margin-bottom: 0.8rem; }
+  .term-body .term-resp a{ color: var(--ink, #EDEDED); }
+
+  .term-inputrow{
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    border-top: 1px solid #333;
+    padding: 0.7rem 1.1rem;
+  }
+  .term-inputrow .term-prompt{ color: var(--stamp-red, #8C1015); font-size: 13px; }
+  .term-inputrow input{
+    flex: 1;
+    background: none;
+    border: none;
+    outline: none;
+    color: var(--ink, #EDEDED);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 13px;
+  }
+
+  @media (max-width: 600px){
+    .term-toggle{ bottom: 1.2rem; right: 1.2rem; }
+  }
+
   /* ============ SITE ============ */
   .site-nav{
     position: sticky;
@@ -981,6 +1080,10 @@
 
   // keyboard support in story mode: arrows to move, escape to skip to the site
   document.addEventListener('keydown', function(e){
+    if (e.target && e.target.id === 'term-input') return;
+    var overlay = document.getElementById('term-overlay');
+    if (overlay && overlay.classList.contains('open')) return;
+
     var storyView = document.getElementById('view-story');
     if (!storyView.classList.contains('active')) return;
 
@@ -996,6 +1099,163 @@
       goTo('site');
     }
   });
+</script>
+
+<button class="term-toggle" onclick="openTerm()" aria-label="Open terminal" title="try the terminal">&gt;_</button>
+
+<div class="term-overlay" id="term-overlay">
+  <div class="term-window">
+    <div class="term-bar">
+      <span>koray@site: ~ &mdash; type <span class="term-cmd">help</span></span>
+      <button onclick="closeTerm()" aria-label="Close terminal">✕</button>
+    </div>
+    <div class="term-body" id="term-body"></div>
+    <div class="term-inputrow">
+      <span class="term-prompt">&gt;</span>
+      <input id="term-input" type="text" autocomplete="off" spellcheck="false" aria-label="Terminal input">
+    </div>
+  </div>
+</div>
+
+<script>
+  (function(){
+    console.log('%cyou opened the console.', 'color:#8C1015;font-weight:bold;font-size:14px;');
+    console.log('%ctry the terminal in the bottom-right corner, or type koray.help() right here.', 'color:#8a8a8a;');
+
+    var termOutput = [
+      "type 'help' to see what this does."
+    ];
+
+    var COMMANDS = {
+      help: function(){
+        return [
+          "available commands:",
+          "  whoami        - who built this",
+          "  about         - the short version",
+          "  languages     - what I actually write code in",
+          "  projects      - list what I've shipped (and lost)",
+          "  runesmp       - the dashboard I lost 60+ hours on",
+          "  story         - jump into the 7-panel story mode",
+          "  song          - what's on repeat",
+          "  sudo make-them-proud",
+          "  clear",
+          "  exit"
+        ].join("\n");
+      },
+      whoami: function(){
+        return "koray. online I mostly go by prada. based in switzerland.";
+      },
+      about: function(){
+        return "15, into hardware and software. never published anything until this site, mostly out of fear of it going badly. shipping it anyway.";
+      },
+      languages: function(){
+        return "main: javascript, c++, lua. also: html/css, python.";
+      },
+      projects: function(){
+        return [
+          "stax          - chrome extension, tabs auto-sorted into groups",
+          "runesmp       - full admin dashboard for a minecraft server (source lost)",
+          "discord tool  - username sniper (source lost)",
+          "paper plugin  - custom minecraft server plugin",
+          "",
+          "type 'runesmp' for more on the one that hurt to lose."
+        ].join("\n");
+      },
+      runesmp: function(){
+        return [
+          "60+ hours. login pages, a database, live TPS/RAM stats, a full",
+          "permissions editor, webhook staff audit logs, a discord bot for",
+          "in-game reward verification. no backup. lost all of it.",
+          "it's in the projects section below, shown from screenshots.",
+          "the lesson cost more than it should have: push to a repo on day one."
+        ].join("\n");
+      },
+      story: function(){
+        setTimeout(function(){ closeTerm(); startStory(); }, 400);
+        return "opening story mode...";
+      },
+      song: function(){
+        return "'vanished' — crystal castles. on repeat right now.";
+      },
+      "sudo make-them-proud": function(){
+        return "permission granted. that part's already in progress.";
+      },
+      clear: function(){
+        document.getElementById('term-body').innerHTML = '';
+        return null;
+      },
+      exit: function(){
+        closeTerm();
+        return null;
+      }
+    };
+
+    var body = document.getElementById('term-body');
+    var input = document.getElementById('term-input');
+    var history = [];
+    var histIdx = -1;
+
+    function printLine(text, cls){
+      var p = document.createElement('p');
+      p.className = 'term-line ' + (cls || 'term-resp');
+      p.textContent = text;
+      body.appendChild(p);
+      body.scrollTop = body.scrollHeight;
+    }
+
+    function runCommand(raw){
+      var cmd = raw.trim().toLowerCase();
+      if (!cmd) return;
+      printLine('> ' + raw, 'term-cmd');
+      history.push(raw);
+      histIdx = history.length;
+
+      if (COMMANDS.hasOwnProperty(cmd)){
+        var out = COMMANDS[cmd]();
+        if (out) printLine(out, 'term-resp');
+      } else {
+        printLine("command not found: " + cmd + " — type 'help'", 'term-resp');
+      }
+    }
+
+    input && input.addEventListener('keydown', function(e){
+      e.stopPropagation();
+      if (e.key === 'Enter'){
+        runCommand(input.value);
+        input.value = '';
+      } else if (e.key === 'ArrowUp'){
+        e.preventDefault();
+        if (histIdx > 0){ histIdx--; input.value = history[histIdx] || ''; }
+      } else if (e.key === 'ArrowDown'){
+        e.preventDefault();
+        if (histIdx < history.length){ histIdx++; input.value = history[histIdx] || ''; }
+      } else if (e.key === 'Escape'){
+        closeTerm();
+      }
+    });
+
+    window.openTerm = function(){
+      document.getElementById('term-overlay').classList.add('open');
+      if (!body.hasChildNodes()){
+        termOutput.forEach(function(l){ printLine(l, 'term-resp'); });
+      }
+      setTimeout(function(){ input && input.focus(); }, 50);
+    };
+    window.closeTerm = function(){
+      document.getElementById('term-overlay').classList.remove('open');
+    };
+
+    // console easter egg: koray.help(), koray.whoami() etc, directly in devtools
+    window.koray = {};
+    Object.keys(COMMANDS).forEach(function(key){
+      var safeKey = key.replace(/[^a-z]/g, '_');
+      window.koray[safeKey] = function(){
+        var out = COMMANDS[key]();
+        if (out) console.log(out);
+        return out;
+      };
+    });
+  })();
 </script>
 
 </body>
